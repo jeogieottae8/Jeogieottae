@@ -32,7 +32,7 @@ public class AuthService {
         String username = request.getUsername();
 
         if (userRepository.existsByEmail(userEmail)) {
-            throw new CustomException(USER_ALREADY_EXISTS);
+            throw new CustomException(ErrorCode.USER_ALREADY_EXISTS);
         }
 
         User user = User.create(userEmail, username, passwordEncoder.encode(request.getPassword()));
