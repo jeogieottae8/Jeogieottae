@@ -1,7 +1,9 @@
 package com.example.jeogieottae.common.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
 public class AuthUser {
 
