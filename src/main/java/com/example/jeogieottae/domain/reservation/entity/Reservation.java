@@ -1,9 +1,9 @@
 package com.example.jeogieottae.domain.reservation.entity;
 
+import com.example.jeogieottae.domain.reservation.dto.CreateReseravtionRequest;
 import com.example.jeogieottae.domain.reservation.enums.ReservationStatus;
 import com.example.jeogieottae.domain.room.entity.Room;
 import com.example.jeogieottae.domain.user.entity.User;
-import com.example.jeogieottae.domain.usercoupon.entity.UserCoupon;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,7 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="reservations")
+@Table(name = "reservations")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -24,10 +24,10 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="check_in", nullable = false)
+    @Column(name = "check_in", nullable = false)
     private LocalDateTime checkIn;
 
-    @Column(name="check_out", nullable = false)
+    @Column(name = "check_out", nullable = false)
     private LocalDateTime checkOut;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -41,7 +41,7 @@ public class Reservation {
     @Column(name = "user_coupon_id")
     private Long userCouponId;
 
-    @Column(name="guest_count", nullable = false)
+    @Column(name = "guest_count", nullable = false)
     private Long guestCount;
 
     @Column(length = 20, nullable = false)
@@ -49,10 +49,37 @@ public class Reservation {
     private ReservationStatus status;
 
     @CreatedDate
-    @Column(name="created_at")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name="is_deleted", nullable = false)
+    @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
+    public Reservation(LocalDateTime checkIn,
+                       LocalDateTime checkOut,
+                       User user, Room room,
+                       Long userCouponId,
+                       Long guest,
+                       ReservationStatus status
+    ) {
+        this.checkIn = checkIn;
+        this.checkOut = checkOut;
+        this.user = user;
+        this.room = room;
+        this.userCouponId = userCouponId;
+        this.guestCount = guest;
+        this.status = status;
+    }
+
+    public static Reservation create(User user, Room room, Long userCouponId, CreateReseravtionRequest request) {
+        return new Reservation(
+                request.getCheckIn(),
+                request.getCheckOut(),
+                user,
+                room,
+                userCouponId,
+                request.getGuest(),
+                request.getStatus()
+        );
+    }
 }
