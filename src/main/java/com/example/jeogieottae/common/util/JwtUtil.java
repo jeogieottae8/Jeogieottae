@@ -51,6 +51,7 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token) {
+
         if (token == null || token.isBlank()) return false;
 
         if (token.startsWith(BEARER_PREFIX)) {
