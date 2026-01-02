@@ -22,14 +22,12 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @PostMapping("/{roomId}/{couponId}")
+    @PostMapping("/roomId/{roomId}/couponId/{couponId}")
     public ResponseEntity<GlobalResponse<CreateReservationResponse>> createReservation(
             @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long roomId,
-            @PathVariable Long couponId,
             @ModelAttribute CreateReservationRequest request
     ) {
-        CreateReservationResponse response = reservationService.createReservation(roomId, couponId, authUser.getUserId(), request);
+        CreateReservationResponse response = reservationService.createReservation(authUser.getUserId(), request);
         return ResponseEntity.ok(GlobalResponse.success(true, "숙소 예약 성공", response));
     }
 
@@ -47,5 +45,12 @@ public class ReservationController {
     ) {
         CustomPageResponse<ReservationResponse> response = reservationService.getAllMyReservation(authUser.getUserId(), pageable);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<GlobalResponse<ReservationResponse>> deleteReservation(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long reservationId) {
+
+        ReservationResponse response = reservationService.deleteReservation(authUser.getUserId(), reservationId);
+        return ResponseEntity.ok(GlobalResponse.success(true, "예약 취소", response));
     }
 }
