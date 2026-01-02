@@ -1,6 +1,9 @@
 package com.example.jeogieottae.domain.reservation.repository;
 
+import com.example.jeogieottae.domain.reservation.dto.ReservationResponse;
 import com.example.jeogieottae.domain.reservation.entity.Reservation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -35,4 +38,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDateTime checkIn,
             LocalDateTime checkOut
     );
+
+    @Query("""
+                    SELECT new com.example.jeogieottae.domain.reservation.dto.ReservationResponse(
+                        u.username, r.discountedPrice, r.checkIn, r.checkOut
+                        )
+                    FROM Reservation r
+                    JOIN r.user u
+                    WHERE u.id = :userId
+            """)
+    Page<ReservationResponse> findAllById(Long userId, Pageable pageable);
 }
