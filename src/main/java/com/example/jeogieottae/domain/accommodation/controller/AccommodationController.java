@@ -35,11 +35,11 @@ public class AccommodationController {
     }
 
     @GetMapping("/{accommodationId}")
-    public GlobalResponse<GetAccommodationResponse> getAccommodation(@PathVariable Long accommodationId) {
+    public ResponseEntity<GlobalResponse<GetAccommodationResponse>> getAccommodation(@PathVariable Long accommodationId) {
 
         GetAccommodationResponse response = accommodationService.getAccommodation(accommodationId);
 
-        return GlobalResponse.success(true, "숙소 상세 조회 성공", response);
+        return ResponseEntity.ok(GlobalResponse.success(true, "숙소 상세 조회 성공", response));
     }
 
 }
