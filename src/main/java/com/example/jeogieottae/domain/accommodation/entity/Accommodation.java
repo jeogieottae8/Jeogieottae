@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name="accommodations")
+@Table(name = "accommodations")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Accommodation {
 
@@ -28,4 +28,7 @@ public class Accommodation {
 
     @Column(nullable = false)
     private double rating;
+
+    @Column(name = "view_count", nullable = false)
+    private Long viewCount;
 }
