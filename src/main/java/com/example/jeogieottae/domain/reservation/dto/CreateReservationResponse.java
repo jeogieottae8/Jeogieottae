@@ -16,7 +16,7 @@ public class CreateReservationResponse {
     private final Long guest;
     private final Long discountPrice;
 
-    public static CreateReservationResponse from(ReservationDto dto, String accommodationName, Long discountPrice) {
+    public static CreateReservationResponse from(ReservationDto dto, String accommodationName) {
 
         return new CreateReservationResponse(
                 dto.getUser().getUsername(),
@@ -24,7 +24,7 @@ public class CreateReservationResponse {
                 dto.getCheckIn(),
                 dto.getCheckOut(),
                 dto.getGuestCount(),
-                discountPrice
+                dto.getDiscountedPrice()
         );
     }
 }

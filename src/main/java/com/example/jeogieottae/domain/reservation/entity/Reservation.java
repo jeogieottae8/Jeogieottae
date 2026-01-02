@@ -38,11 +38,17 @@ public class Reservation {
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
-    @Column(name = "user_coupon_id")
-    private Long userCouponId;
+    @Column(name = "coupon_name")
+    private String couponName;
 
     @Column(name = "guest_count", nullable = false)
     private Long guestCount;
+
+    @Column(name = "original_price")
+    private Long originalPrice;
+
+    @Column(name = "discounted_price, nullable = false")
+    private Long discountedPrice;
 
     @Column(length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
@@ -55,7 +61,12 @@ public class Reservation {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
-    public static Reservation create(User user, Room room, Long userCouponId, CreateReservationRequest request) {
+    public static Reservation create(User user,
+                                     Room room,
+                                     String couponName,
+                                     Long originalPrice,
+                                     Long discountedPrice,
+                                     CreateReservationRequest request) {
 
         Reservation reservation = new Reservation();
 
@@ -63,8 +74,10 @@ public class Reservation {
         reservation.checkOut = request.getCheckOut();
         reservation.user = user;
         reservation.room = room;
-        reservation.userCouponId = userCouponId;
+        reservation.couponName = couponName;
         reservation.guestCount = request.getGuest();
+        reservation.originalPrice = originalPrice;
+        reservation.discountedPrice = discountedPrice;
         reservation.status = request.getStatus();
         reservation.isDeleted = false;
 

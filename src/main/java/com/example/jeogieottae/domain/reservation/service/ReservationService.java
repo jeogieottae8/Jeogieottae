@@ -51,16 +51,19 @@ public class ReservationService {
             throw new CustomException(ErrorCode.RESERVATION_NOT_AVAILABLE);
         }
 
+
         Room room = roomRepository.getReferenceById(roomId);
         User user = userRepository.getReferenceById(userId);
 
-        Long discountPrice = room.getPrice() * (100 - userCoupon.getCoupon().getDiscountValue()) / 100;
+        String couponName = userCoupon.getCoupon().getName();
+        Long originalPrice = room.getPrice();
+        Long discountPrice = originalPrice * (100 - userCoupon.getCoupon().getDiscountValue()) / 100;
 
-        Reservation reservation = reservationRepository.save(Reservation.create(user, room, userCouponId, request));
+        Reservation reservation = reservationRepository.save(Reservation.create(user, room, couponName, originalPrice, discountPrice,request));
 
         ReservationDto dto = ReservationDto.from(reservation);
         String accommodationName = room.getAccommodation().getName();
 
-        return CreateReservationResponse.from(dto, accommodationName, discountPrice);
+        return CreateReservationResponse.from(dto, accommodationName);
     }
 }

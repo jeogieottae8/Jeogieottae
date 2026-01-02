@@ -18,8 +18,10 @@ public class ReservationDto {
     private LocalDateTime checkOut;
     private User user;
     private Room room;
-    private Long userCouponId;
+    private String couponName;
     private Long guestCount;
+    private Long originalPrice;
+    private Long discountedPrice;
     private ReservationStatus status;
     private LocalDateTime createdAt;
     private Boolean isDeleted;
@@ -32,8 +34,10 @@ public class ReservationDto {
                 reservation.getCheckOut(),
                 reservation.getUser(),
                 reservation.getRoom(),
-                reservation.getUserCouponId(),
+                reservation.getCouponName(),
                 reservation.getGuestCount(),
+                reservation.getOriginalPrice(),
+                reservation.getDiscountedPrice(),
                 reservation.getStatus(),
                 reservation.getCreatedAt(),
                 reservation.getIsDeleted()
