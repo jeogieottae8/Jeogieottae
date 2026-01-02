@@ -1,6 +1,5 @@
 package com.example.jeogieottae.domain.accommodation.dto.response;
 
-
 import com.example.jeogieottae.domain.accommodation.entity.Accommodation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +14,7 @@ public class AccommodationResponse {
     private final int availableRooms;
 
     public static AccommodationResponse from(Accommodation accommodation) {
+
         return new AccommodationResponse(
                 accommodation.getName(),
                 0,

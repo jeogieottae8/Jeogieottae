@@ -5,20 +5,17 @@ import com.example.jeogieottae.common.response.GlobalResponse;
 import com.example.jeogieottae.domain.accommodation.dto.response.AccommodationResponse;
 import com.example.jeogieottae.domain.accommodation.service.AccommodationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/accommodation")
+@RequestMapping("/accommodations")
 public class AccommodationController {
 
     private final AccommodationService accommodationService;
@@ -26,10 +23,7 @@ public class AccommodationController {
     @GetMapping()
     public ResponseEntity<GlobalResponse<CustomPageResponse<AccommodationResponse>>> getAccommodationList(
 
-            @PageableDefault(
-                    page = 0,
-                    size = 10
-            )
+            @PageableDefault(page = 0, size = 10)
             Pageable pageable
     ) {
         CustomPageResponse<AccommodationResponse> result = accommodationService.getAccommodationList(pageable);
