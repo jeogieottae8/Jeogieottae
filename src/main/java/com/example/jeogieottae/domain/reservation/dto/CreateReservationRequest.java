@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CreateReservationRequest {
 
+    private Long roomId;
+    private Long userCouponId;
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
     private Long guest;

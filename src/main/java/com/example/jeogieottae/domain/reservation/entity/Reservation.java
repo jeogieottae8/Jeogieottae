@@ -48,7 +48,7 @@ public class Reservation {
     @Column(name = "original_price")
     private Long originalPrice;
 
-    @Column(name = "discounted_price, nullable = false")
+    @Column(name = "discounted_price", nullable = false)
     private Long discountedPrice;
 
     @Column(length = 20, nullable = false)

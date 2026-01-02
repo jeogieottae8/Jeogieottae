@@ -32,12 +32,10 @@ public class ReservationService {
 
     @Transactional
     public CreateReservationResponse createReservation(
-            Long roomId,
-            Long userCouponId,
             Long userId,
             CreateReservationRequest request
     ) {
-        UserCoupon userCoupon = userCouponRepository.findById(userCouponId).orElseThrow(
+        UserCoupon userCoupon = userCouponRepository.findById(request.getUserCouponId()).orElseThrow(
                 () -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
 
         if (userCoupon.isUsed()) {
@@ -46,7 +44,7 @@ public class ReservationService {
 
         Boolean ableToReservationFlag = reservationRepository.ableToReservation(
                 userId,
-                roomId,
+                request.getRoomId(),
                 request.getCheckIn(),
                 request.getCheckOut()
         );
@@ -55,7 +53,7 @@ public class ReservationService {
             throw new CustomException(ErrorCode.RESERVATION_NOT_AVAILABLE);
         }
 
-        Room room = roomRepository.getReferenceById(roomId);
+        Room room = roomRepository.getReferenceById(request.getRoomId());
         User user = userRepository.getReferenceById(userId);
 
         String couponName = userCoupon.getCoupon().getName();
@@ -85,6 +83,10 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
                 () -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND)
         );
+
+        if (reservation.getIsDeleted()) {
+            throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
 
         if (!reservation.getUser().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN);
