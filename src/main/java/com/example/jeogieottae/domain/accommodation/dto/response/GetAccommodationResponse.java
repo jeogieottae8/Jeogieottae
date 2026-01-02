@@ -1,6 +1,7 @@
 package com.example.jeogieottae.domain.accommodation.dto.response;
 
 import com.example.jeogieottae.domain.accommodation.entity.Accommodation;
+import com.example.jeogieottae.domain.accommodation.enums.City;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public class GetAccommodationResponse {
 
     private final String name;
-    private final String location;
+    private final City location;
     private final double rating;
     private final int availableRooms;
     private final Long viewCount;
