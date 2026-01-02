@@ -45,7 +45,7 @@ public class ReservationController {
             Pageable pageable,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        CustomPageResponse<ReservationResponse> response = reservationService.getAllReservation(authUser.getUserId(), pageable);
+        CustomPageResponse<ReservationResponse> response = reservationService.getAllMyReservation(authUser.getUserId(), pageable);
         return ResponseEntity.ok(response);
     }
 }

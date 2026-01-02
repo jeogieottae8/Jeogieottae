@@ -74,7 +74,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public CustomPageResponse<ReservationResponse> getAllReservation(Long userId, Pageable pageable) {
+    public CustomPageResponse<ReservationResponse> getAllMyReservation(Long userId, Pageable pageable) {
         Page<ReservationResponse> response = reservationRepository.findAllById(userId, pageable);
         return CustomPageResponse.from(response);
     }
