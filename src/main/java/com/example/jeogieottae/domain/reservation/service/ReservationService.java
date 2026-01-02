@@ -55,7 +55,6 @@ public class ReservationService {
             throw new CustomException(ErrorCode.RESERVATION_NOT_AVAILABLE);
         }
 
-
         Room room = roomRepository.getReferenceById(roomId);
         User user = userRepository.getReferenceById(userId);
 
@@ -73,7 +72,7 @@ public class ReservationService {
         return CreateReservationResponse.from(dto, accommodationName);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public CustomPageResponse<ReservationResponse> getAllMyReservation(Long userId, Pageable pageable) {
         Page<ReservationResponse> response = reservationRepository.findAllById(userId, pageable);
         return CustomPageResponse.from(response);
