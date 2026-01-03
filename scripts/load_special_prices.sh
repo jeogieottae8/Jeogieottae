@@ -2,6 +2,11 @@
 set -e
 source .env
 
+cd csv/generator
+javac SpecialPriceCsvGenerator.java
+java SpecialPriceCsvGenerator
+cd ../../
+
 until docker exec mysql8.4 \
   mysql --local-infile=1 \
         --default-character-set=utf8mb4 \
@@ -10,6 +15,15 @@ until docker exec mysql8.4 \
 do
   sleep 2
 done
+
+mkdir -p csv/special_prices
+
+# 컨테이너 CSV 디렉토리
+docker exec mysql8.4 mkdir -p /var/lib/mysql-files/special_prices
+
+# CSV 복사 (로컬 → 컨테이너)
+docker cp csv/special_prices/special_prices_100.csv \
+  mysql8.4:/var/lib/mysql-files/special_prices/special_prices_100.csv
 
 docker exec -i mysql8.4 \
   mysql --local-infile=1 \

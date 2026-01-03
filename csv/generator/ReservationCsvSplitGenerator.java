@@ -96,7 +96,6 @@ public class ReservationCsvSplitGenerator {
 
             writtenInFile++;
 
-            if (i % 500_000 == 0) System.out.println(i + " rows generated");
         }
 
         w.close();

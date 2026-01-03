@@ -2,6 +2,11 @@
 set -e
 source .env
 
+cd csv/generator
+javac RoomCsvSplitGenerator.java
+java RoomCsvSplitGenerator
+cd ../../
+
 until docker exec mysql8.4 \
   mysql -u root -p${DB_PASSWORD} \
         -e "SELECT 1" >/dev/null 2>&1
@@ -12,7 +17,13 @@ done
 for file in csv/rooms/rooms_*.csv
 do
   FILE_NAME=$(basename "$file")
-  echo "loading ${FILE_NAME}"
+
+mkdir -p csv/rooms
+docker exec mysql8.4 mkdir -p /var/lib/mysql-files/rooms
+
+# 로컬 → 컨테이너 복사
+  docker cp "$file" \
+    mysql8.4:/var/lib/mysql-files/rooms/"${FILE_NAME}"
 
   docker exec -i mysql8.4 \
     mysql --local-infile=1 \

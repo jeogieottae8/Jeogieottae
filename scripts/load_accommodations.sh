@@ -1,5 +1,9 @@
 source .env
 
+cd csv/generator
+javac AccommodationCsvGenerator.java
+java AccommodationCsvGenerator
+cd ../../
 
 until docker exec mysql8.4 \
   mysql --local-infile=1 \
@@ -11,10 +15,16 @@ do
 done
 
 
+# 컨테이너 내부 CSV 디렉토리 보장
+docker exec mysql8.4 mkdir -p /var/lib/mysql-files/accommodations
+
 for file in csv/accommodations/accommodations_*.csv
 do
   FILE_NAME=$(basename "$file")
-  echo "loading ${FILE_NAME}"
+
+  # 로컬 → 컨테이너 복사
+  docker cp "$file" \
+    mysql8.4:/var/lib/mysql-files/accommodations/"${FILE_NAME}"
 
   docker exec -i mysql8.4 \
     mysql --local-infile=1 \

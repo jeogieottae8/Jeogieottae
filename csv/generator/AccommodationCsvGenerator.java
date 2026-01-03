@@ -62,7 +62,6 @@ public class AccommodationCsvGenerator {
             writtenInFile++;
 
             if (i % 100_000 == 0) {
-                System.out.println(i + " rows generated");
             }
         }
 
