@@ -21,7 +21,6 @@ do
 mkdir -p csv/rooms
 docker exec mysql8.4 mkdir -p /var/lib/mysql-files/rooms
 
-# 로컬 → 컨테이너 복사
   docker cp "$file" \
     mysql8.4:/var/lib/mysql-files/rooms/"${FILE_NAME}"
 

@@ -34,10 +34,4 @@ public class CouponController {
                 .status(HttpStatus.OK)
                 .body(GlobalResponse.success(true, "쿠폰 목록 조회 성공", result));
     }
-
-    @GetMapping("/test")
-    public String test() {
-        return "ok";
-    }
 }
-

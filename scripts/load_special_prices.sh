@@ -18,10 +18,8 @@ done
 
 mkdir -p csv/special_prices
 
-# 컨테이너 CSV 디렉토리
 docker exec mysql8.4 mkdir -p /var/lib/mysql-files/special_prices
 
-# CSV 복사 (로컬 → 컨테이너)
 docker cp csv/special_prices/special_prices_100.csv \
   mysql8.4:/var/lib/mysql-files/special_prices/special_prices_100.csv
 
