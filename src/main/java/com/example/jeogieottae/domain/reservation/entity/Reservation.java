@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -47,7 +48,7 @@ public class Reservation {
     @Column(name = "original_price")
     private Long originalPrice;
 
-    @Column(name = "discounted_price, nullable = false")
+    @Column(name = "discounted_price", nullable = false)
     private Long discountedPrice;
 
     @Column(length = 20, nullable = false)
@@ -58,6 +59,7 @@ public class Reservation {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Setter
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
