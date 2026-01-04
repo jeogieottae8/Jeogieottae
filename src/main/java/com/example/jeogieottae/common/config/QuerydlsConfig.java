@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class QuerydlsConfig {
+
     @PersistenceContext
     private EntityManager em;
 

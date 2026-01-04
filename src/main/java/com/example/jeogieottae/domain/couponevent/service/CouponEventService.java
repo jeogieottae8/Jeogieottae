@@ -1,5 +1,6 @@
 package com.example.jeogieottae.domain.couponevent.service;
 
+import com.example.jeogieottae.common.annotation.RedisLock;
 import com.example.jeogieottae.common.exception.CustomException;
 import com.example.jeogieottae.common.exception.ErrorCode;
 import com.example.jeogieottae.domain.coupon.entity.Coupon;
@@ -23,6 +24,7 @@ public class CouponEventService {
     private final UserCouponRepository userCouponRepository;
 
     @Transactional
+    @RedisLock(key="lock:couponEvent")
     public UserCouponResponse issueCouponEvent(Long userId, Long couponEventId) {
 
         CouponEvent event = couponEventRepository.findByIdForUpdate(couponEventId)

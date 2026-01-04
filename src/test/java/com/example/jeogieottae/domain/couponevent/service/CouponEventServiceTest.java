@@ -3,6 +3,7 @@ package com.example.jeogieottae.domain.couponevent.service;
 import com.example.jeogieottae.domain.couponevent.entity.CouponEvent;
 import com.example.jeogieottae.domain.couponevent.repository.CouponEventRepository;
 import com.example.jeogieottae.domain.usercoupon.repository.UserCouponRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.LongStream;
 
+@Slf4j
 @SpringBootTest
 class CouponEventServiceTest {
 
@@ -54,9 +56,6 @@ class CouponEventServiceTest {
         long issuedCount = userCouponRepository.countByUserIdAndCouponId(
                 userId, event.getCoupon().getId()
         );
-
-        System.out.println("남은 수량 = " + event.getAvailableQuantity());
-        System.out.println("userId=80 발급된 쿠폰 수 = " + issuedCount);
     }
 
     @Test
@@ -131,9 +130,51 @@ class CouponEventServiceTest {
         long issuedCount = userCouponRepository.countByCouponId(
                 event.getCoupon().getId()
         );
-        System.out.println("남은 수량 = " + event.getAvailableQuantity());
-        System.out.println("전체 발급된 쿠폰 수 = " + issuedCount);
+        log.info("[여러 유저 동시 발급 테스트] 남은 수량 = {}", event.getAvailableQuantity());
+        log.info("[여러 유저 동시 발급 테스트] 전체 발급된 쿠폰 수 = {}", issuedCount);
 
+        assert issuedCount == 5;
+        assert event.getAvailableQuantity() == 0;
+    }
+
+    @Test
+    void redis_분산락_테스트() throws InterruptedException {
+
+        int threadCount = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        long couponEventId = 3L;
+        List<Long> userIdList = LongStream.rangeClosed(1L, threadCount)
+                .boxed()
+                .toList();
+        for(long userId : userIdList) {
+            executorService.submit(() -> {
+                try {
+                    couponEventService.issueCouponEvent(userId, couponEventId);
+                } catch (Exception e) {
+                    //락 획득 실패 / 수량 초과
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        // then
+        CouponEvent event = couponEventRepository.findById(couponEventId)
+                .orElseThrow();
+
+        long issuedCount = userCouponRepository.countByCouponId(
+                event.getCoupon().getId()
+        );
+
+        log.info("[Redis 분산락 테스트] 남은 수량 = {}",event.getAvailableQuantity());
+        log.info("[Redis 분산락 테스트] 전체 발급된 쿠폰 수 = {}",issuedCount);
+
+        // 검증
         assert issuedCount == 5;
         assert event.getAvailableQuantity() == 0;
     }

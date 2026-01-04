@@ -1,12 +1,13 @@
 package com.example.jeogieottae.domain.couponevent.repository;
 
 import com.example.jeogieottae.domain.couponevent.entity.CouponEvent;
-import com.example.jeogieottae.domain.couponevent.entity.QCouponEvent;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
+
+import static com.example.jeogieottae.domain.couponevent.entity.QCouponEvent.couponEvent;
 
 @RequiredArgsConstructor
 public class QCouponEventRepositoryImpl implements QCouponEventRepository {
@@ -15,7 +16,6 @@ public class QCouponEventRepositoryImpl implements QCouponEventRepository {
 
     @Override
     public Optional<CouponEvent> findByIdForUpdate(Long id) {
-        QCouponEvent couponEvent = QCouponEvent.couponEvent;
 
         CouponEvent result = queryFactory
                 .selectFrom(couponEvent)
