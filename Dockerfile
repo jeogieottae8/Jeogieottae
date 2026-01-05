@@ -5,7 +5,7 @@ WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY gradle ./gradle
 
-RUN gradle --no-daemon build -x test --refresh-dependencies || true
+RUN gradle --no-daemon build -x test --refresh-dependencies
 
 COPY src ./src
 
