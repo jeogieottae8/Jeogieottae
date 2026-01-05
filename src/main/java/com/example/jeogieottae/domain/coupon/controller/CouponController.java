@@ -36,10 +36,11 @@ public class CouponController {
             Pageable pageable,
             @RequestParam(required = false) String accommodation,
             @RequestParam(required = false) String discount,
-            @RequestParam(required = false) Long minPrice
+            @RequestParam(required = false) Long minPriceValue
     ) {
-        AccommodationType accommodationType = accommodation == null ? null : AccommodationType.valueOf(accommodation);
-        CouponType discountType = discount == null ? null : CouponType.valueOf(discount);
+        AccommodationType accommodationType = accommodation == null ? AccommodationType.HOTEL : AccommodationType.valueOf(accommodation);
+        CouponType discountType = discount == null ? CouponType.FIXED : CouponType.valueOf(discount);
+        Long minPrice = minPriceValue == null ? 0 : minPriceValue;
 
         CustomPageResponse<CouponResponse> result = couponService.getCouponList(pageable, accommodationType, discountType, minPrice);
         return ResponseEntity
