@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/accommodations")
@@ -39,4 +41,11 @@ public class AccommodationController {
         return ResponseEntity.ok(GlobalResponse.success(true, "숙소 상세 조회 성공", response));
     }
 
+    @GetMapping("/views/ranking")
+    public ResponseEntity<GlobalResponse<List<GetAccommodationCacheResponse>>> findAccommodationTodayTop10() {
+
+        List<GetAccommodationCacheResponse> response = accommodationService.GetAccommodationCacheResponse();
+
+        return ResponseEntity.ok(GlobalResponse.success(true, "실시간 조회수 랭킹 조회 성공", response));
+    }
 }

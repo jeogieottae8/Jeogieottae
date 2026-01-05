@@ -12,12 +12,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -66,7 +69,7 @@ public class AccommodationService {
 
         String currentKey = "current_accommodation_views";
         redisTemplate.opsForZSet().incrementScore(currentKey, accommodationId, 1);
-        redisTemplate.expire(dailyKey, 1, TimeUnit.DAYS);
+        redisTemplate.expire(dailyKey, 1, TimeUnit.HOURS);
 
         return response;
     }
@@ -100,4 +103,27 @@ public class AccommodationService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<GetAccommodationCacheResponse> GetAccommodationCacheResponse() {
+
+        String accommodationViewsKey = "daily_accommodation_views: " + LocalDate.now();
+
+        Set<ZSetOperations.TypedTuple<Object>> result = redisTemplate
+                .opsForZSet()
+                .reverseRangeWithScores(accommodationViewsKey, 0, 9);
+
+        if (result == null) {
+            return Collections.emptyList();
+        }
+
+        return result.stream()
+                .map(tuple -> {
+                    Long accommodationId = Long.parseLong(tuple.getValue().toString());
+                    Accommodation accommodation = accommodationRepository.findById(accommodationId).orElseThrow(
+                            () -> new CustomException(ErrorCode.ACCOMMODATION_NOT_FOUND));
+                    return GetAccommodationCacheResponse.from(accommodation);
+                })
+                .toList();
+
+    }
 }
