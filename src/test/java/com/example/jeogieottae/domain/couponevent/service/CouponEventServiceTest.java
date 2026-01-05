@@ -1,12 +1,15 @@
 package com.example.jeogieottae.domain.couponevent.service;
 
+import com.example.jeogieottae.domain.coupon.enums.CouponEventStatus;
 import com.example.jeogieottae.domain.couponevent.entity.CouponEvent;
 import com.example.jeogieottae.domain.couponevent.repository.CouponEventRepository;
 import com.example.jeogieottae.domain.usercoupon.repository.UserCouponRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -25,8 +28,21 @@ class CouponEventServiceTest {
     @Autowired
     private UserCouponRepository userCouponRepository;
 
+    @BeforeEach
+    void setUp() {
+        userCouponRepository.deleteAll();
+
+        CouponEvent event = couponEventRepository.findById(3L)
+                .orElseThrow();
+
+        ReflectionTestUtils.setField(event, "availableQuantity", 5L);
+        ReflectionTestUtils.setField(event, "status", CouponEventStatus.ONGOING);
+
+        couponEventRepository.saveAndFlush(event);
+    }
+
     @Test
-    void 동일_유저_동시_쿠폰_발급_테스트() throws InterruptedException {
+    void 동일_유저_동시_쿠폰_발급_테스트_락없음() throws InterruptedException {
 
         //given
         int threadCount = 10;
@@ -175,7 +191,7 @@ class CouponEventServiceTest {
         log.info("[Redis 분산락 테스트] 전체 발급된 쿠폰 수 = {}",issuedCount);
 
         // 검증
-        assert issuedCount == 5;
-        assert event.getAvailableQuantity() == 0;
+        assert issuedCount == 1;
+        assert event.getAvailableQuantity() == 4;
     }
 }

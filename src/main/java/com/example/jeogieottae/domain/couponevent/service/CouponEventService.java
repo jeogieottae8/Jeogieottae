@@ -27,7 +27,7 @@ public class CouponEventService {
     @RedisLock(key="lock:couponEvent")
     public UserCouponResponse issueCouponEvent(Long userId, Long couponEventId) {
 
-        CouponEvent event = couponEventRepository.findByIdForUpdate(couponEventId)
+        CouponEvent event = couponEventRepository.findById(couponEventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
 
         event.validateIssuable();
