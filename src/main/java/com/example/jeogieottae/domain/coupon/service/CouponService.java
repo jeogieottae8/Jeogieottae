@@ -19,13 +19,11 @@ public class CouponService {
     private final CouponRepository couponRepository;
 
     @Transactional(readOnly = true)
-    public CustomPageResponse<CouponResponse> getAllCoupons(Pageable pageable,
+    public CustomPageResponse<CouponResponse> getCouponList(Pageable pageable,
                                                             AccommodationType accommodation,
                                                             CouponType discount,
                                                             Long minPrice
     ) {
-
-
         Page<Coupon> couponPageList = couponRepository.findCouponList(pageable, accommodation, discount, minPrice);
         Page<CouponResponse> couponResponsePage = couponPageList.map(CouponResponse::from);
 

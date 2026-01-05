@@ -25,7 +25,7 @@ public class CouponController {
     private final CouponService couponService;
 
     @GetMapping
-    public ResponseEntity<GlobalResponse<CustomPageResponse<CouponResponse>>> getAllCoupons(
+    public ResponseEntity<GlobalResponse<CustomPageResponse<CouponResponse>>> getCouponList(
 
             @PageableDefault(
                     page = 0,
@@ -38,10 +38,10 @@ public class CouponController {
             @RequestParam(required = false) String discount,
             @RequestParam(required = false) Long minPrice
     ) {
-        AccommodationType accommodationType = AccommodationType.valueOf(accommodation);
-        CouponType discountType = CouponType.valueOf(discount);
+        AccommodationType accommodationType = accommodation == null ? null : AccommodationType.valueOf(accommodation);
+        CouponType discountType = discount == null ? null : CouponType.valueOf(discount);
 
-        CustomPageResponse<CouponResponse> result = couponService.getAllCoupons(pageable, accommodationType, discountType, minPrice);
+        CustomPageResponse<CouponResponse> result = couponService.getCouponList(pageable, accommodationType, discountType, minPrice);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(GlobalResponse.success(true, "쿠폰 목록 조회 성공", result));
