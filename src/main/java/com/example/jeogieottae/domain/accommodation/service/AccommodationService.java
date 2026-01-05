@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +48,7 @@ public class AccommodationService {
     @Transactional(readOnly = true)
     public GetAccommodationCacheResponse getAccommodation(Long accommodationId) {
 
-        String key = "accommodation" + accommodationId;
+        String key = "accommodation: " + accommodationId;
 
         GetAccommodationCacheResponse response = (GetAccommodationCacheResponse) redisTemplate.opsForValue().get(key);
 
@@ -92,13 +91,14 @@ public class AccommodationService {
             Double score = redisTemplate.opsForZSet().score(accommodationKey, accommodationId);
 
             if (score != null && score > 0) {
-
                 Accommodation accommodation = accommodationRepository.findById(accommodationId).orElse(null);
+
                 if (accommodation != null) {
                     accommodation.setViewCount(accommodation.getViewCount() + score.intValue());
                     accommodationRepository.save(accommodation);
                 }
             }
+
             redisTemplate.opsForZSet().remove(accommodationKey, accommodationId);
         }
     }
@@ -106,6 +106,14 @@ public class AccommodationService {
     @Transactional(readOnly = true)
     public List<GetAccommodationCacheResponse> GetAccommodationCacheResponse() {
 
+        String key = "views_ranking";
+        List<Object> resultList = redisTemplate.opsForList().range(key, 0, -1);
+
+        return resultList.stream().map(result -> (GetAccommodationCacheResponse) result).toList();
+    }
+
+    @Scheduled(cron = "0 0 * * * *")
+    public void updateRanking() {
         String accommodationViewsKey = "daily_accommodation_views: " + LocalDate.now();
 
         Set<ZSetOperations.TypedTuple<Object>> result = redisTemplate
@@ -113,17 +121,22 @@ public class AccommodationService {
                 .reverseRangeWithScores(accommodationViewsKey, 0, 9);
 
         if (result == null) {
-            return Collections.emptyList();
+            return;
         }
 
-        return result.stream()
-                .map(tuple -> {
-                    Long accommodationId = Long.parseLong(tuple.getValue().toString());
-                    Accommodation accommodation = accommodationRepository.findById(accommodationId).orElseThrow(
-                            () -> new CustomException(ErrorCode.ACCOMMODATION_NOT_FOUND));
-                    return GetAccommodationCacheResponse.from(accommodation);
-                })
-                .toList();
+        String rankingKey = "views_ranking";
 
+        redisTemplate.opsForList().getOperations().delete(rankingKey);
+
+        for (ZSetOperations.TypedTuple<Object> tuple : result) {
+
+            Long accommodationId = Long.parseLong(tuple.getValue().toString());
+            Accommodation accommodation = accommodationRepository.findById(accommodationId).orElseThrow(
+                    () -> new CustomException(ErrorCode.ACCOMMODATION_NOT_FOUND));
+
+            GetAccommodationCacheResponse response = GetAccommodationCacheResponse.from(accommodation);
+
+            redisTemplate.opsForList().rightPush(rankingKey, response);
+        }
     }
 }

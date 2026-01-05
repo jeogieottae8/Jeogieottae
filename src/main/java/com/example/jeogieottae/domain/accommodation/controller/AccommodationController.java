@@ -46,6 +46,6 @@ public class AccommodationController {
 
         List<GetAccommodationCacheResponse> response = accommodationService.GetAccommodationCacheResponse();
 
-        return ResponseEntity.ok(GlobalResponse.success(true, "실시간 조회수 랭킹 조회 성공", response));
+        return ResponseEntity.ok(GlobalResponse.success(true, "일일 조회수 랭킹 조회 성공", response));
     }
 }
