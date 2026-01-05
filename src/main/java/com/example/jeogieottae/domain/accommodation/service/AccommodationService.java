@@ -5,15 +5,17 @@ import com.example.jeogieottae.common.exception.ErrorCode;
 import com.example.jeogieottae.common.response.CustomPageResponse;
 import com.example.jeogieottae.domain.accommodation.dto.condition.SearchAccommodationCond;
 import com.example.jeogieottae.domain.accommodation.dto.response.AccommodationResponse;
-import com.example.jeogieottae.domain.accommodation.dto.response.GetAccommodationResponse;
+import com.example.jeogieottae.domain.accommodation.dto.response.GetAccommodationCacheResponse;
 import com.example.jeogieottae.domain.accommodation.entity.Accommodation;
 import com.example.jeogieottae.domain.accommodation.repository.AccommodationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 public class AccommodationService {
 
     private final AccommodationRepository accommodationRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional(readOnly = true)
     public CustomPageResponse<AccommodationResponse> searchAccommodations(SearchAccommodationCond cond, Pageable pageable) {
@@ -37,12 +40,26 @@ public class AccommodationService {
     }
 
     @Transactional(readOnly = true)
-    public GetAccommodationResponse getAccommodation(Long accommodationId) {
+    public GetAccommodationCacheResponse getAccommodation(Long accommodationId) {
 
-        Accommodation accommodation = accommodationRepository.findById(accommodationId).orElseThrow(
-                () -> new CustomException(ErrorCode.ACCOMMODATION_NOT_FOUND));
+        String key = "accommodation" + accommodationId;
 
-        return GetAccommodationResponse.from(accommodation);
+        GetAccommodationCacheResponse response = (GetAccommodationCacheResponse) redisTemplate.opsForValue().get(key);
+
+        if (response == null) {
+            Accommodation accommodation = accommodationRepository.findById(accommodationId).orElseThrow(
+                    () -> new CustomException(ErrorCode.ACCOMMODATION_NOT_FOUND));
+
+            response = GetAccommodationCacheResponse.from(accommodation);
+
+            redisTemplate.opsForValue().set(key, response);
+        }
+
+        LocalDate today = LocalDate.now();
+        String accommodationViewsKey = "accommodation_views: " + today;
+        redisTemplate.opsForZSet().incrementScore(accommodationViewsKey, accommodationId, 1);
+
+        return response;
     }
 
 }
