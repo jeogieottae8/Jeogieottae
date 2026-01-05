@@ -28,17 +28,6 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;
 
-    private static Long getDiscountPrice(Long specialPrice, Coupon coupon) {
-        Long discountPrice = specialPrice * (100 - coupon.getDiscountValue()) / 100;
-
-        if (specialPrice >= coupon.getMinPrice()) {
-            discountPrice = coupon.getDiscountType().equals(CouponType.RATE)
-                    ? (specialPrice * (100 - coupon.getDiscountValue()) / 100)
-                    : specialPrice - coupon.getDiscountValue();
-        }
-        return discountPrice;
-    }
-
     @Transactional
     public CreateReservationResponse createReservation(
             Long userId,
@@ -66,17 +55,31 @@ public class ReservationService {
                 ? originalPrice
                 : (originalPrice * (100 - userRoom.getSpecialPriceDiscount()) / 100);
 
-        Coupon coupon = userCoupon.getCoupon();
+        Coupon coupon = userCoupon != null ? userCoupon.getCoupon() : null;
         String couponName = coupon != null ? coupon.getName() : null;
 
-        Long discountPrice = getDiscountPrice(specialPrice, coupon);
+        Long discountPrice = getDiscountPrice(specialPrice, userCoupon);
 
         Reservation reservation = reservationRepository.save(
                 Reservation.create(user, room, couponName, originalPrice, discountPrice, request));
 
-        userCoupon.setUsed(true);
-
         return CreateReservationResponse.from(reservation, userRoom);
+    }
+
+    private Long getDiscountPrice(Long specialPrice, UserCoupon userCoupon) {
+
+        Long discountPrice = specialPrice;
+
+        Coupon coupon = userCoupon != null ? userCoupon.getCoupon() : null;
+
+        if (coupon != null && specialPrice >= coupon.getMinPrice()) {
+            discountPrice = coupon.getDiscountType().equals(CouponType.RATE)
+                    ? (specialPrice * (100 - coupon.getDiscountValue()) / 100)
+                    : specialPrice - coupon.getDiscountValue();
+
+            userCoupon.setUsed(true);
+        }
+        return discountPrice;
     }
 
     @Transactional(readOnly = true)
