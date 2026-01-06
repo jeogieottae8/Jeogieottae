@@ -1,5 +1,6 @@
 package com.example.jeogieottae.domain.reservation.dto;
 
+import com.example.jeogieottae.domain.reservation.entity.Reservation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -16,15 +17,15 @@ public class CreateReservationResponse {
     private final Long guest;
     private final Long discountPrice;
 
-    public static CreateReservationResponse from(ReservationDto dto, String accommodationName) {
+    public static CreateReservationResponse from(Reservation reservation, ReservationInfoDto dto) {
 
         return new CreateReservationResponse(
-                dto.getUser().getUsername(),
-                accommodationName,
-                dto.getCheckIn(),
-                dto.getCheckOut(),
-                dto.getGuestCount(),
-                dto.getDiscountedPrice()
+                dto.getUsername(),
+                dto.getAccommodationName(),
+                reservation.getCheckIn(),
+                reservation.getCheckOut(),
+                reservation.getGuestCount(),
+                reservation.getDiscountedPrice()
         );
     }
 }
