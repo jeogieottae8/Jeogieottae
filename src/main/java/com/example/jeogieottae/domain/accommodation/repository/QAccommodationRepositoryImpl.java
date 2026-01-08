@@ -51,7 +51,7 @@ public class QAccommodationRepositoryImpl implements QAccommodationRepository {
                         notReserved(cond.getStartDate(), cond.getEndDate())
                 )
                 .groupBy(accommodation.id)
-                .orderBy(createOrderSpecifier(cond.getSort()))
+                .orderBy(createOrderSpecifier(cond.getSortBy()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
