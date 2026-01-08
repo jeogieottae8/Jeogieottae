@@ -9,12 +9,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Base64;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("/payments")
 public class PaymentController {
@@ -55,15 +56,8 @@ public class PaymentController {
     }
 
     @GetMapping("/fail")
-    public ResponseEntity<String> failPayment(@ModelAttribute FailPaymentRequest request) {
+    public String failPayment(@ModelAttribute FailPaymentRequest request) {
 
-        return ResponseEntity.ok(request.getMessage());
-    }
-
-
-    @PostMapping("/confirm")
-    public ResponseEntity<String> confirmPayment(@RequestBody ConfirmRequest request) {
-        String result = paymentService.successPayment(request);
-        return ResponseEntity.ok(result);
+        return "redirect:/fail.html";
     }
 }

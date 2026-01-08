@@ -21,6 +21,7 @@ public enum ErrorCode {
     USER_NOT_MATCH(403, "접근 권한이 없습니다"),
     PASSWORD_NOT_MATCH(403, "비밀번호가 일치하지 않습니다."),
     FORBIDDEN(403, "접근 권한이 없습니다"),
+    PAYMENT_NOT_AVAILABLE(403, "결제 시간이 만료되었습니다."),
 
     //------401-----------------------
     LOGIN_REQUIRED(401, "로그인한 유저만 사용할 수 있는 기능입니다"),

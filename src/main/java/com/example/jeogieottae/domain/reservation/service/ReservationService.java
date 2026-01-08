@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -97,6 +99,11 @@ public class ReservationService {
         if (reservation.getIsDeleted()) {
             throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
         }
+
+        if (reservation.getPaymentDeadline().isBefore(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.PAYMENT_NOT_AVAILABLE);
+        }
+
         return ReservationResponse.from(reservation);
     }
 

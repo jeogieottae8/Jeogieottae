@@ -1,8 +1,7 @@
 package com.example.jeogieottae.common.filter;
 
 import com.example.jeogieottae.common.dto.AuthUser;
-//import com.example.jeogieottae.common.utils.JwtUtil;
-import com.example.jeogieottae.common.util.JwtUtil;
+import com.example.jeogieottae.common.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +29,9 @@ public class JwtFilter extends OncePerRequestFilter {
             "/auth/signin",
             "/coupons",
             "/accommodations",
-            "/infra"
+            "/infra",
+            "/success.html",
+            "/fail.html"
     );
 
     @Override
