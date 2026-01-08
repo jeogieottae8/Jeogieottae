@@ -3,7 +3,6 @@ package com.example.jeogieottae.domain.payment.service;
 import com.example.jeogieottae.common.exception.CustomException;
 import com.example.jeogieottae.common.exception.ErrorCode;
 import com.example.jeogieottae.domain.payment.dto.ConfirmRequest;
-import com.example.jeogieottae.domain.payment.dto.RequestPaymentResponse;
 import com.example.jeogieottae.domain.reservation.entity.Reservation;
 import com.example.jeogieottae.domain.reservation.enums.ReservationPayment;
 import com.example.jeogieottae.domain.reservation.repository.ReservationRepository;
@@ -32,7 +31,7 @@ public class PaymentService {
     private final WebClient webClient = WebClient.builder().build();
 
     @Transactional
-    public RequestPaymentResponse requestPayment(Long userId, Long reservationId) {
+    public String requestPayment(Long userId, Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
                 () -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND)
@@ -51,7 +50,7 @@ public class PaymentService {
         }
 
         String paymentUrl = "http://localhost:8080/payment_page.html?reservationId=" + reservationId;
-        return RequestPaymentResponse.from(paymentUrl);
+        return paymentUrl;
     }
 
     @Transactional
@@ -78,6 +77,8 @@ public class PaymentService {
         reservation.setPayment(ReservationPayment.SUCCESS);
         reservationRepository.flush();
 
-        return "결제가 완료되었습니다.";
+        String redirectUrl = "redirect:/success.html";
+
+        return redirectUrl;
     }
 }
