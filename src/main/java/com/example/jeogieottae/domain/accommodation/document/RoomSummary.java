@@ -1,5 +1,6 @@
 package com.example.jeogieottae.domain.accommodation.document;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class RoomSummary {
 
     @Field(type = FieldType.Long)
@@ -22,11 +24,4 @@ public class RoomSummary {
 
     @Field(type = FieldType.Keyword)
     private List<String> reservedDates;
-
-    public RoomSummary(Long roomId, Long price, Integer maxGuest, List<String> reservedDates) {
-        this.roomId = roomId;
-        this.price = price;
-        this.maxGuest = maxGuest;
-        this.reservedDates = reservedDates;
-    }
 }

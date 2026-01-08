@@ -3,6 +3,7 @@ package com.example.jeogieottae.domain.accommodation.document;
 import com.example.jeogieottae.domain.accommodation.enums.AccommodationType;
 import com.example.jeogieottae.domain.accommodation.enums.City;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Document(indexName = "accommodations")
 @Setting(settingPath = "elasticsearch/settings.json")
 public class AccommodationDocument {
@@ -39,14 +41,4 @@ public class AccommodationDocument {
 
     @Field(type = FieldType.Nested)
     private List<RoomSummary> rooms;
-
-    public AccommodationDocument(Long id, String name, AccommodationType type, City location, double rating, Long viewCount, List<RoomSummary> rooms) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.location = location;
-        this.rating = rating;
-        this.viewCount = viewCount;
-        this.rooms = rooms;
-    }
 }
