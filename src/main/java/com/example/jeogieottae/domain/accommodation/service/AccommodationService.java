@@ -50,7 +50,6 @@ public class AccommodationService {
     public GetAccommodationCacheResponse getAccommodation(Long accommodationId, String ipAddress) {
 
         String key = "accommodation: " + accommodationId;
-
         GetAccommodationCacheResponse response = (GetAccommodationCacheResponse) redisTemplate.opsForValue().get(key);
 
         if (response == null) {
@@ -64,22 +63,22 @@ public class AccommodationService {
         }
 
         String checkIp = accommodationId + ":" + ipAddress;
-
         boolean isNotViewed = redisTemplate.opsForValue().setIfAbsent(checkIp, "viewed", Duration.ofMinutes(5));
 
         if (isNotViewed) {
 
             String currentKey = "current_accommodation_views";
-            saveCache(currentKey, accommodationId, TimeUnit.HOURS);
+            saveZSetCache(currentKey, accommodationId, TimeUnit.HOURS);
 
             String dailyKey = "daily_accommodation_views: " + LocalDate.now();
-            saveCache(dailyKey, accommodationId, TimeUnit.DAYS);
+            saveZSetCache(dailyKey, accommodationId, TimeUnit.DAYS);
         }
 
         return response;
     }
 
-    private void saveCache(String key, Long accommodationId, TimeUnit days) {
+    private void saveZSetCache(String key, Long accommodationId, TimeUnit days) {
+
         redisTemplate.opsForZSet().incrementScore(key, accommodationId, 1);
         redisTemplate.expire(key, 1, days);
     }
@@ -136,7 +135,6 @@ public class AccommodationService {
         }
 
         String rankingKey = "views_ranking";
-
         redisTemplate.opsForList().getOperations().delete(rankingKey);
 
         for (ZSetOperations.TypedTuple<Object> tuple : result) {
