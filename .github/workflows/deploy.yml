@@ -62,6 +62,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "IMAGE=${IMAGE_NAME}:${IMAGE_TAG}"
             docker pull $IMAGE_NAME:$IMAGE_TAG
             docker stop jeogieottae || true
             docker rm jeogieottae || true
