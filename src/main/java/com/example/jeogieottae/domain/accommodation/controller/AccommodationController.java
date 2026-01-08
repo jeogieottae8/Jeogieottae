@@ -6,6 +6,7 @@ import com.example.jeogieottae.domain.accommodation.dto.response.AccommodationRe
 import com.example.jeogieottae.domain.accommodation.dto.response.GetAccommodationCacheResponse;
 import com.example.jeogieottae.domain.accommodation.service.AccommodationSearchService;
 import com.example.jeogieottae.domain.accommodation.service.AccommodationService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -36,9 +37,12 @@ public class AccommodationController {
     }
 
     @GetMapping("/{accommodationId}")
-    public ResponseEntity<GlobalResponse<GetAccommodationCacheResponse>> getAccommodation(@PathVariable Long accommodationId) {
+    public ResponseEntity<GlobalResponse<GetAccommodationCacheResponse>> getAccommodation(@PathVariable Long accommodationId, HttpServletRequest request) {
 
         GetAccommodationCacheResponse result = accommodationService.getAccommodation(accommodationId);
+        String ipAddress = request.getRemoteAddr();
+
+        GetAccommodationCacheResponse response = accommodationService.getAccommodation(accommodationId, ipAddress);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
