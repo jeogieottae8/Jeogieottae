@@ -75,7 +75,7 @@ jobs:
       - name: Health check SERVER 1
         run: |
           for i in {1..30}; do
-            if curl -sf http://${{ secrets.EC2_HOST_1 }}:8080/infra > /dev/null; then
+            if curl -sf http://localhost:8080/infra > /dev/null; then
               echo "SERVER 1 healthy"
               exit 0
             fi
@@ -105,7 +105,7 @@ jobs:
       - name: Health check SERVER 2
         run: |
           for i in {1..30}; do
-            if curl -sf http://${{ secrets.EC2_HOST_2 }}:8080/infra > /dev/null; then
+            if curl -sf http://localhost:8080/infra > /dev/null; then
               echo "SERVER 2 healthy"
               exit 0
             fi
