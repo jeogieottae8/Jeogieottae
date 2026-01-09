@@ -1,0 +1,146 @@
+name: CI/CD Jeogieottae
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+    types:
+      - closed
+  push:
+    branches:
+      - infra
+
+jobs:
+  build-and-deploy:
+    if: >
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+      || (github.event_name == 'push' && github.ref == 'refs/heads/infra')
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/jeogieottaeserver
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Give execute permission to gradlew
+        run: chmod +x gradlew
+
+      - name: Set up Docker Buildx
+        run: docker buildx create --use
+
+      - name: Build Docker Image
+        run: |
+          docker buildx build \
+            --no-cache \
+            -t $IMAGE_NAME:$IMAGE_TAG \
+            --load .
+
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker Image
+        run: docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # DEPLOY SERVER 1 + HEALTH CHECK (on EC2)
+      - name: Deploy to EC2 SERVER 1 (with health check)
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST_1 }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "IMAGE=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+            docker pull "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+
+            # Ensure .env exists
+            touch .env
+
+            # Force-disable search + disable ES repositories (to allow boot without ES)
+            # Remove existing keys to avoid duplicates
+            sed -i '/^APP_FEATURES_SEARCH_ENABLED=/d' .env
+            sed -i '/^SPRING_DATA_ELASTICSEARCH_REPOSITORIES_ENABLED=/d' .env
+
+            echo "APP_FEATURES_SEARCH_ENABLED=false" >> .env
+            echo "SPRING_DATA_ELASTICSEARCH_REPOSITORIES_ENABLED=false" >> .env
+
+            docker stop jeogieottae || true
+            docker rm jeogieottae || true
+
+            docker run -d \
+              --name jeogieottae \
+              -p 8080:8080 \
+              --env-file .env \
+              "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+
+            echo "Waiting for SERVER 1 health..."
+            for i in {1..30}; do
+              if curl -sf http://localhost:8080/infra > /dev/null; then
+                echo "SERVER 1 healthy"
+                exit 0
+              fi
+              sleep 5
+            done
+
+            echo "SERVER 1 health check failed"
+            docker logs --tail 200 jeogieottae || true
+            exit 1
+
+      # DEPLOY SERVER 2 + HEALTH CHECK (on EC2)
+      - name: Deploy to EC2 SERVER 2 (with health check)
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST_2 }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "IMAGE=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+            docker pull "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+
+            # Ensure .env exists
+            touch .env
+
+            sed -i '/^APP_FEATURES_SEARCH_ENABLED=/d' .env
+            sed -i '/^SPRING_DATA_ELASTICSEARCH_REPOSITORIES_ENABLED=/d' .env
+
+            echo "APP_FEATURES_SEARCH_ENABLED=false" >> .env
+            echo "SPRING_DATA_ELASTICSEARCH_REPOSITORIES_ENABLED=false" >> .env
+
+            docker stop jeogieottae || true
+            docker rm jeogieottae || true
+
+            docker run -d \
+              --name jeogieottae \
+              -p 8080:8080 \
+              --env-file .env \
+              "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+
+            echo "Waiting for SERVER 2 health..."
+            for i in {1..30}; do
+              if curl -sf http://localhost:8080/infra > /dev/null; then
+                echo "SERVER 2 healthy"
+                exit 0
+              fi
+              sleep 5
+            done
+
+            echo "SERVER 2 health check failed"
+            docker logs --tail 200 jeogieottae || true
+            exit 1
