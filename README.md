@@ -65,6 +65,8 @@ Collaboration & Tools
 
 Modeling & Design
 - DrawSQ
+## 시스템 아키텍쳐
+<img width="1881" height="1041" alt="저기어때_시스템_아키텍처 drawio" src="https://github.com/user-attachments/assets/844aea36-4551-4a7e-9881-3df140620e11" />
 
 ## ERD
 <img width="701" height="669" alt="스크린샷 2026-01-08 오후 9 50 22" src="https://github.com/user-attachments/assets/8021141e-96ff-4e5a-a03e-366c11ec3166" />
