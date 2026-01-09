@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class RequestPaymentResponse {
-    private String paymentUrl;
+    private final String paymentUrl;
 
     public static RequestPaymentResponse from(String paymentUrl) {
 

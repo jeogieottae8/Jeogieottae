@@ -3,9 +3,13 @@ package com.example.jeogieottae.domain.payment.service;
 import com.example.jeogieottae.common.exception.CustomException;
 import com.example.jeogieottae.common.exception.ErrorCode;
 import com.example.jeogieottae.domain.payment.dto.ConfirmRequest;
+import com.example.jeogieottae.domain.payment.dto.RequestPaymentResponse;
 import com.example.jeogieottae.domain.reservation.entity.Reservation;
 import com.example.jeogieottae.domain.reservation.enums.ReservationPayment;
 import com.example.jeogieottae.domain.reservation.repository.ReservationRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -31,15 +35,11 @@ public class PaymentService {
     private final WebClient webClient = WebClient.builder().build();
 
     @Transactional
-    public String requestPayment(Long userId, Long reservationId) {
+    public RequestPaymentResponse requestPayment(Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
                 () -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND)
         );
-
-        if (!reservation.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
 
         if (reservation.getPayment().equals(ReservationPayment.SUCCESS)) {
             throw new CustomException(ErrorCode.PAID_RESERVATION);
@@ -50,11 +50,11 @@ public class PaymentService {
         }
 
         String paymentUrl = "http://localhost:8080/payment_page.html?reservationId=" + reservationId;
-        return paymentUrl;
+        return RequestPaymentResponse.from(paymentUrl);
     }
 
     @Transactional
-    public String successPayment(ConfirmRequest request) {
+    public String successPayment(ConfirmRequest request) throws JsonProcessingException {
 
         String response = webClient.post()
                 .uri(baseUrl + "/confirm")
@@ -66,10 +66,26 @@ public class PaymentService {
                 .bodyToMono(String.class)
                 .block();
 
-        String[] orderId = request.getOrderId().split("-");
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode json = objectMapper.readTree(response);
 
-        Reservation reservation = reservationRepository.findById(Long.valueOf(orderId[0])).orElseThrow(
-                () -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+        String status = json.get("status").asText();
+        String orderId = json.get("orderId").asText();
+        Long amount = json.get("amount").asLong();
+
+        if (!"DONE".equals(status)) {
+            throw new CustomException(ErrorCode.PAYMENT_NOT_AVAILABLE);
+        }
+
+        Long reservationId = Long.valueOf(orderId.split("-")[0]);
+
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
+                () -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND)
+        );
+
+        if (!amount.equals(reservation.getDiscountedPrice())) {
+            throw new CustomException(ErrorCode.AMOUNT_NOT_MATCH);
+        }
 
         if (reservation.getPayment().equals(ReservationPayment.SUCCESS)) {
             throw new CustomException(ErrorCode.PAID_RESERVATION);
@@ -77,7 +93,7 @@ public class PaymentService {
         reservation.setPayment(ReservationPayment.SUCCESS);
         reservationRepository.flush();
 
-        String redirectUrl = "redirect:/success.html";
+        String redirectUrl = "/success.html";
 
         return redirectUrl;
     }

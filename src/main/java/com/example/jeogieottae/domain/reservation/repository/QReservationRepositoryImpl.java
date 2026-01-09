@@ -5,6 +5,7 @@ import com.example.jeogieottae.common.exception.ErrorCode;
 import com.example.jeogieottae.domain.reservation.dto.ReservationInfoDto;
 import com.example.jeogieottae.domain.reservation.dto.ReservationResponse;
 import com.example.jeogieottae.domain.reservation.entity.Reservation;
+import com.example.jeogieottae.domain.reservation.enums.ReservationPayment;
 import com.example.jeogieottae.domain.specialprice.entity.QSpecialPrice;
 import com.example.jeogieottae.domain.usercoupon.entity.UserCoupon;
 import com.querydsl.core.types.Projections;
@@ -46,6 +47,8 @@ public class QReservationRepositoryImpl implements QReservationRepository{
                 .leftJoin(reservation).on(
                         reservation.room.id.eq(roomId),
                         reservation.isDeleted.isFalse(),
+                        reservation.payment.eq(ReservationPayment.PENDING),
+                        reservation.paymentDeadline.gt(LocalDateTime.now()),
                         reservation.checkIn.lt(checkOut),
                         reservation.checkOut.gt(checkIn)
                 )
@@ -94,7 +97,9 @@ public class QReservationRepositoryImpl implements QReservationRepository{
                 .join(room.accommodation, accommodation)
                 .where(
                         user.id.eq(userId),
-                        reservation.isDeleted.isFalse()
+                        reservation.isDeleted.isFalse(),
+                        reservation.payment.eq(ReservationPayment.PENDING),
+                        reservation.paymentDeadline.gt(LocalDateTime.now())
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -114,7 +119,12 @@ public class QReservationRepositoryImpl implements QReservationRepository{
                 .join(reservation.user, user).fetchJoin()
                 .join(reservation.room, room).fetchJoin()
                 .join(room.accommodation, accommodation).fetchJoin()
-                .where(reservation.id.eq(reservationId))
+                .where(
+                        reservation.id.eq(reservationId),
+                        reservation.isDeleted.isFalse(),
+                        reservation.payment.eq(ReservationPayment.PENDING),
+                        reservation.paymentDeadline.gt(LocalDateTime.now())
+                )
                 .fetchOne();
 
     }

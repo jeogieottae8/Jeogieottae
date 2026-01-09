@@ -1,48 +1,42 @@
 package com.example.jeogieottae.domain.payment.controller;
 
-import com.example.jeogieottae.common.dto.AuthUser;
+import com.example.jeogieottae.common.response.GlobalResponse;
 import com.example.jeogieottae.domain.payment.dto.ConfirmRequest;
 import com.example.jeogieottae.domain.payment.dto.FailPaymentRequest;
+import com.example.jeogieottae.domain.payment.dto.RequestPaymentResponse;
 import com.example.jeogieottae.domain.payment.service.PaymentService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.io.IOException;
+
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/payments")
 public class PaymentController {
-
-    @Value("${spring.payment.secret-key}")
-    private String secretKey;
-
-    @Value("${spring.payment.base-url}")
-    private String baseUrl;
 
     private final PaymentService paymentService;
 
     @PostMapping("/request")
-    public String requestPayment(@AuthenticationPrincipal AuthUser authUser, @RequestParam Long reservationId) {
+    public ResponseEntity<GlobalResponse<RequestPaymentResponse>> requestPayment(@RequestParam Long reservationId) {
 
-        String redirectUrl = paymentService.requestPayment(authUser.getUserId(), reservationId);
-        return redirectUrl;
+        RequestPaymentResponse response = paymentService.requestPayment(reservationId);
+        return ResponseEntity.ok(GlobalResponse.success(true, "결제 요청 성공", response));
     }
 
-    @GetMapping("/payments/success")
-    public String successPayment(@ModelAttribute ConfirmRequest request) {
+    @GetMapping("/success")
+    public void successPayment(@ModelAttribute ConfirmRequest request, HttpServletResponse response) throws IOException {
 
         String redirectUrl = paymentService.successPayment(request);
-
-        return redirectUrl;
+        response.sendRedirect(redirectUrl);
     }
 
-    @GetMapping("/payments/fail")
-    public String failPayment(@ModelAttribute FailPaymentRequest request) {
+    @GetMapping("/fail")
+    public void failPayment(@ModelAttribute FailPaymentRequest request, HttpServletResponse response) throws IOException {
 
-        return "redirect:/fail.html";
+        String redirectUrl = "/fail.html";
+        response.sendRedirect(redirectUrl);
     }
 }
