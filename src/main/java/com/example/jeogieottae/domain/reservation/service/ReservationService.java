@@ -4,7 +4,6 @@ import com.example.jeogieottae.common.exception.CustomException;
 import com.example.jeogieottae.common.exception.ErrorCode;
 import com.example.jeogieottae.common.response.CustomPageResponse;
 import com.example.jeogieottae.common.utils.PaymentTokenUtil;
-import com.example.jeogieottae.domain.accommodation.service.AccommodationSyncService;
 import com.example.jeogieottae.domain.coupon.entity.Coupon;
 import com.example.jeogieottae.domain.coupon.enums.CouponType;
 import com.example.jeogieottae.domain.reservation.dto.*;
