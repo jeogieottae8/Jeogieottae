@@ -73,6 +73,8 @@ public class Reservation {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
+    //누락해버린 결제정보 orderId, paymentKey...
+
     @PrePersist
     public void prePersist() {
 

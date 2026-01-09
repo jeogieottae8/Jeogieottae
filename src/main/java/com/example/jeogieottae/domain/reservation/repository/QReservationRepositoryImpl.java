@@ -3,6 +3,7 @@ package com.example.jeogieottae.domain.reservation.repository;
 import com.example.jeogieottae.common.exception.CustomException;
 import com.example.jeogieottae.common.exception.ErrorCode;
 import com.example.jeogieottae.domain.reservation.dto.ReservationInfoDto;
+import com.example.jeogieottae.domain.reservation.dto.ReservationPaymentResponse;
 import com.example.jeogieottae.domain.reservation.dto.ReservationResponse;
 import com.example.jeogieottae.domain.reservation.entity.Reservation;
 import com.example.jeogieottae.domain.reservation.enums.ReservationPayment;
@@ -119,6 +120,28 @@ public class QReservationRepositoryImpl implements QReservationRepository{
                 .join(reservation.user, user).fetchJoin()
                 .join(reservation.room, room).fetchJoin()
                 .join(room.accommodation, accommodation).fetchJoin()
+                .where(
+                        reservation.id.eq(reservationId),
+                        reservation.isDeleted.isFalse(),
+                        reservation.payment.eq(ReservationPayment.PENDING),
+                        reservation.paymentDeadline.gt(LocalDateTime.now())
+                )
+                .fetchOne();
+
+    }
+
+    @Override
+    public ReservationPaymentResponse findByIdForReservationPayment(Long reservationId) {
+
+        return queryFactory
+                .select(Projections.constructor(ReservationPaymentResponse.class,
+                                reservation.id,
+                                user.username,
+                                accommodation.name,
+                                reservation.discountedPrice))
+                .from(reservation)
+                .join(reservation.user, user)
+                .join(room.accommodation, accommodation)
                 .where(
                         reservation.id.eq(reservationId),
                         reservation.isDeleted.isFalse(),

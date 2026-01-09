@@ -1,6 +1,7 @@
 package com.example.jeogieottae.domain.reservation.repository;
 
 import com.example.jeogieottae.domain.reservation.dto.ReservationInfoDto;
+import com.example.jeogieottae.domain.reservation.dto.ReservationPaymentResponse;
 import com.example.jeogieottae.domain.reservation.dto.ReservationResponse;
 import com.example.jeogieottae.domain.reservation.entity.Reservation;
 import com.example.jeogieottae.domain.usercoupon.entity.UserCoupon;
@@ -23,4 +24,6 @@ public interface QReservationRepository {
     Page<ReservationResponse> findAllById(Long userId, Pageable pageable);
 
     Reservation findByIdWithUserAndAccommodation(Long reservationId);
+
+    ReservationPaymentResponse findByIdForReservationPayment(Long reservationId);
 }

@@ -41,8 +41,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String uri = request.getRequestURI();
 
+        if (uri.startsWith("/payments/request")) {
+            return false;
+        }
         return EXCLUDED_URIS.contains(uri)
-                || uri.startsWith("/reservations/one/")
+                || uri.startsWith("/reservations/payments/")
                 || uri.startsWith("/payments/");
     }
 

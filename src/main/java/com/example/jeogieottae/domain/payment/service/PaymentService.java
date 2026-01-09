@@ -2,6 +2,7 @@ package com.example.jeogieottae.domain.payment.service;
 
 import com.example.jeogieottae.common.exception.CustomException;
 import com.example.jeogieottae.common.exception.ErrorCode;
+import com.example.jeogieottae.common.utils.PaymentTokenUtil;
 import com.example.jeogieottae.domain.payment.dto.ConfirmRequest;
 import com.example.jeogieottae.domain.payment.dto.RequestPaymentResponse;
 import com.example.jeogieottae.domain.reservation.entity.Reservation;
@@ -33,9 +34,10 @@ public class PaymentService {
 
     private final ReservationRepository reservationRepository;
     private final WebClient webClient = WebClient.builder().build();
+    private final PaymentTokenUtil tokenUtil;
 
     @Transactional
-    public RequestPaymentResponse requestPayment(Long reservationId) {
+    public RequestPaymentResponse requestPayment(Long userId, Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
                 () -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND)
@@ -49,7 +51,13 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PAYMENT_NOT_AVAILABLE);
         }
 
-        String paymentUrl = "http://localhost:8080/payment_page.html?reservationId=" + reservationId;
+        String token = tokenUtil.create(
+                userId,
+                reservationId,
+                reservation.getPaymentDeadline()
+        );
+
+        String paymentUrl = "http://localhost:8080/payment_page.html?token=" + token;
         return RequestPaymentResponse.from(paymentUrl);
     }
 
@@ -71,7 +79,7 @@ public class PaymentService {
 
         String status = json.get("status").asText();
         String orderId = json.get("orderId").asText();
-        Long amount = json.get("amount").asLong();
+        Long amount = json.get("easyPay").get("amount").asLong();
 
         if (!"DONE".equals(status)) {
             throw new CustomException(ErrorCode.PAYMENT_NOT_AVAILABLE);

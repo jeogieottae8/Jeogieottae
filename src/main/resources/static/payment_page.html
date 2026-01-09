@@ -23,7 +23,7 @@
 </style>
 <body>
 
-<p id="reservationId"></p>
+<p id="token"></p>
 <!-- 결제 UI -->
 <div id="payment-method"></div>
 <!-- 이용약관 UI -->
@@ -40,9 +40,9 @@
         const button = document.getElementById("payment-button");
 
         const urlParams = new URLSearchParams(window.location.search);
-        const reservationId = urlParams.get("reservationId");
+        const token = urlParams.get("token");
 
-        const reservation = await fetch("http://localhost:8080/reservations/one/" + reservationId)
+        const reservation = await fetch("http://localhost:8080/reservations/payments/" + token)
             .then(res => res.json())
             .then(data => data.data);
 

@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/login/oauth2/**"
                         ).permitAll()
-                        .requestMatchers("/reservations/one/**").permitAll()
+                        .requestMatchers("/payments/request").authenticated()
+                        .requestMatchers("/reservations/payments/**").permitAll()
                         .requestMatchers("/payments/**").permitAll()
                         .requestMatchers("/payment_page.html", "/success.html", "/fail.html").permitAll()
                         .anyRequest().authenticated()

@@ -5,6 +5,7 @@ import com.example.jeogieottae.common.response.CustomPageResponse;
 import com.example.jeogieottae.common.response.GlobalResponse;
 import com.example.jeogieottae.domain.reservation.dto.CreateReservationRequest;
 import com.example.jeogieottae.domain.reservation.dto.CreateReservationResponse;
+import com.example.jeogieottae.domain.reservation.dto.ReservationPaymentResponse;
 import com.example.jeogieottae.domain.reservation.dto.ReservationResponse;
 import com.example.jeogieottae.domain.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,13 @@ public class ReservationController {
 
         ReservationResponse response = reservationService.getMyReservation(reservationId);
         return ResponseEntity.ok(GlobalResponse.success(true, "내역 조회 성공", response));
+    }
+
+    @GetMapping("/payments/{token}")
+    public ResponseEntity<GlobalResponse<ReservationPaymentResponse>> getReservationPayment(@PathVariable String token) {
+
+        ReservationPaymentResponse response = reservationService.getReservationPayment(token);
+        return ResponseEntity.ok(GlobalResponse.success(true, "결제 요청 정보 조회 성공", response));
     }
 
     @DeleteMapping("/{reservationId}")

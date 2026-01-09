@@ -3,13 +3,11 @@ package com.example.jeogieottae.domain.reservation.service;
 import com.example.jeogieottae.common.exception.CustomException;
 import com.example.jeogieottae.common.exception.ErrorCode;
 import com.example.jeogieottae.common.response.CustomPageResponse;
+import com.example.jeogieottae.common.utils.PaymentTokenUtil;
 import com.example.jeogieottae.domain.accommodation.service.AccommodationSyncService;
 import com.example.jeogieottae.domain.coupon.entity.Coupon;
 import com.example.jeogieottae.domain.coupon.enums.CouponType;
-import com.example.jeogieottae.domain.reservation.dto.CreateReservationRequest;
-import com.example.jeogieottae.domain.reservation.dto.CreateReservationResponse;
-import com.example.jeogieottae.domain.reservation.dto.ReservationInfoDto;
-import com.example.jeogieottae.domain.reservation.dto.ReservationResponse;
+import com.example.jeogieottae.domain.reservation.dto.*;
 import com.example.jeogieottae.domain.reservation.entity.Reservation;
 import com.example.jeogieottae.domain.reservation.repository.ReservationRepository;
 import com.example.jeogieottae.domain.room.entity.Room;
@@ -22,8 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -31,6 +27,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;
     private final AccommodationSyncService accommodationSyncService;
+    private final PaymentTokenUtil tokenUtil;
 
     @Transactional
     public CreateReservationResponse createReservation(
@@ -99,16 +96,27 @@ public class ReservationService {
     public ReservationResponse getMyReservation(Long reservationId) {
 
         Reservation reservation = reservationRepository.findByIdWithUserAndAccommodation(reservationId);
+        return ReservationResponse.from(reservation);
+    }
 
-        if (reservation.getIsDeleted()) {
+    @Transactional(readOnly = true)
+    public ReservationPaymentResponse getReservationPayment(String token) {
+
+
+        Long reservationId = tokenUtil.extractReservationId(token);
+
+        Reservation reservation = reservationRepository.findByIdWithUserAndAccommodation(reservationId);
+
+        if (reservation == null) {
             throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
         }
+        boolean verify = tokenUtil.verify(token, reservation.getUser().getId());
 
-        if (reservation.getPaymentDeadline().isBefore(LocalDateTime.now())) {
-            throw new CustomException(ErrorCode.PAYMENT_NOT_AVAILABLE);
+        if (!verify) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
-        return ReservationResponse.from(reservation);
+        return ReservationPaymentResponse.from(reservation);
     }
 
     @Transactional
